@@ -87,7 +87,7 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 
 		ua := r.UserAgent()
 		for _, v := range instances {
-			if v == "+*" || strings.HasSuffix(ua, v) {
+			if v == "*" || strings.HasSuffix(ua, v) {
 				defer accessLog(r, "DENY")
 
 				w.WriteHeader(denyCode)
