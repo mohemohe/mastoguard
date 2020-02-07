@@ -1,5 +1,7 @@
 # mastoguard
 
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/mohemohe/mastoguard?style=flat-square)](https://hub.docker.com/r/mohemohe/mastoguard)
+
 ウザいインスタンスをブロックするためのリバプロ
 
 ## 環境変数
@@ -7,6 +9,7 @@
 | 名前 | デフォルト値 | 必須 | 説明 |
 | - | - | - | - |
 | PROXY_TARGET | \- | Y | プロキシ先のURL |
+| PROXY_HOST | \- | N | プロキシ先に渡すHostヘッダーの値 |
 | LISTEN_ADDR | :8080 | N | mastoguardがlistenするアドレス |
 | DENY_CODE | 451 | N | アクセスを弾く場合のステータスコード |
 | DENY_UA | \- | N | 部分一致で弾くUAを`,`区切りで指定する（`*`を指定すると全部弾く） |

@@ -25,6 +25,9 @@ func main() {
 	}
 	ltsvlog.Logger.Debug().String("env 'PROXY_TARGET'", t).Log()
 
+	h := os.Getenv("PROXY_HOST")
+	ltsvlog.Logger.Debug().String("env 'PROXY_HOST'", h).Log()
+
 	a := os.Getenv("LISTEN_ADDR")
 	if a == "" {
 		a  = ":8080"
@@ -57,17 +60,23 @@ func main() {
 	}
 
 	p := httputil.NewSingleHostReverseProxy(u)
-	http.HandleFunc("/", handler(p, u))
+	http.HandleFunc("/", handler(p, u, h))
 	ltsvlog.Logger.Info().String("event", "mastoguard ready").Log()
 	ltsvlog.Logger.Err(http.ListenAndServe(a, nil))
 }
 
-func handler(p *httputil.ReverseProxy, u *url.URL) func(http.ResponseWriter, *http.Request) {
+func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Scheme = u.Scheme
-		r.URL.Host = u.Host
-		r.Host = u.Host
-		r.Header.Set("Host", u.Host)
+		if h != "" {
+			r.URL.Host = h
+			r.Host = h
+			r.Header.Set("Host", h)
+		} else {
+			r.URL.Host = u.Host
+			r.Host = u.Host
+			r.Header.Set("Host", u.Host)
+		}
 		f := r.Header.Get("X-Forwarded-For")
 		if f == "" {
 			f = r.RemoteAddr
