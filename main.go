@@ -7,6 +7,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -29,6 +30,17 @@ func main() {
 		a  = ":8080"
 	}
 	ltsvlog.Logger.Debug().String("env 'LISTEN_ADDR'", a).Log()
+
+	c := os.Getenv("DENY_CODE")
+	if c != "" {
+		if i, err := strconv.Atoi(c); err == nil && http.StatusText(i) != "" {
+			denyCode = i
+		} else {
+			ltsvlog.Logger.Err(errstack.WithLV(errstack.New("env 'DENY_CODE' is invalid")))
+			os.Exit(1)
+		}
+	}
+	ltsvlog.Logger.Debug().String("env 'DENY_CODE'", c).Int("deny code", denyCode).Log()
 
 	bs := os.Getenv("DENY_UA")
 	if bs != "" {
