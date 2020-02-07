@@ -1,0 +1,5 @@
+github.com/hnakamur/errstack v0.2.0 h1:vB3zuGccLOV0e/eFM74mNU0/oOvo7XPohIuFsJKhS6g=
+github.com/hnakamur/errstack v0.2.0/go.mod h1:od3sg2FcV0HOZ1VGgL/cfn5yvj5hdHZsTF9KDvQQQpY=
+github.com/hnakamur/ltsvlog v2.0.4+incompatible h1:edFPELOLdpLAvVfMtjHfeSujkvE9CfnntA46GeADjY8=
+github.com/hnakamur/ltsvlog/v3 v3.0.3 h1:QYaVLPoOciv/tvtgEem32lgDzZDP8kX+BcXqzZV5MWM=
+github.com/hnakamur/ltsvlog/v3 v3.0.3/go.mod h1:ok1oGR09iFjjwaSvlxAYPDAVmc14H3AkCd5Fpj3BDW4=
