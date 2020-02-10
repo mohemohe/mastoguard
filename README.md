@@ -12,7 +12,8 @@
 | PROXY_HOST | \- | N | プロキシ先に渡すHostヘッダーの値 |
 | LISTEN_ADDR | :8080 | N | mastoguardがlistenするアドレス |
 | DENY_CODE | 451 | N | アクセスを弾く場合のステータスコード |
-| DENY_UA | \- | N | 部分一致で弾くUAを`,`区切りで指定する（`*`を指定すると全部弾く） |
+| DENY_UA | \- | N | 部分一致で弾くUAを`,`区切りで指定する |
+| DENY_CIDR | \- | N | 弾くCIDRを`,`区切りで指定する |
 
 ## ログ形式
 

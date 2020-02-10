@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/hnakamur/errstack"
 	"github.com/hnakamur/ltsvlog/v3"
+	"github.com/rs/xid"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -12,6 +14,7 @@ import (
 )
 
 var instances = make([]string, 0)
+var cidrs = make([]*net.IPNet, 0)
 var denyCode = 451
 var nullBody = []byte("")
 
@@ -53,6 +56,22 @@ func main() {
 	}
 	ltsvlog.Logger.Debug().String("env 'DENY_UA'", bs).Log()
 
+	cs := os.Getenv("DENY_CIDR")
+	if cs != "" {
+		for _, v := range strings.Split(cs, ",") {
+			_, ipnet, err := net.ParseCIDR(v)
+			if err != nil {
+				ltsvlog.Logger.Err(err)
+				ltsvlog.Logger.Debug().String("cidr", v).Log()
+			} else {
+				cidrs = append(cidrs, ipnet)
+			}
+		}
+	} else {
+		cidrs = make([]*net.IPNet, 0)
+	}
+	ltsvlog.Logger.Debug().String("env 'DENY_CIDR'", cs).Log()
+
 	u, err := url.Parse(t)
 	if err != nil {
 		ltsvlog.Logger.Err(err)
@@ -67,6 +86,11 @@ func main() {
 
 func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		guid := xid.New().String()
+
+		rip := remoteIP(r)
+		sip := strings.Join(rip, ",")
+
 		r.URL.Scheme = u.Scheme
 		if h != "" {
 			r.URL.Host = h
@@ -85,10 +109,13 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 		}
 		r.Header.Set("X-Forwarded-For", f)
 
+		accessLog(r, guid, sip, "REQUEST")
+
 		ua := r.UserAgent()
 		for _, v := range instances {
-			if v == "*" || strings.HasSuffix(ua, v) {
-				defer accessLog(r, "DENY")
+			if strings.HasSuffix(ua, v) {
+				accessLog(r, guid, sip, "DENY")
+				defer accessLog(r, guid, sip, "HANDLED")
 
 				w.WriteHeader(denyCode)
 				_, _ = w.Write(nullBody)
@@ -96,18 +123,43 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 			}
 		}
 
-		defer accessLog(r, "ALLOW")
+		for _, v := range cidrs {
+			for _, u := range rip {
+				if Contains(v, strings.TrimSpace(u)) {
+					accessLog(r, guid, sip, "DENY")
+					defer accessLog(r, guid, sip, "HANDLED")
+					w.WriteHeader(denyCode)
+					_, _ = w.Write(nullBody)
+					return
+				}
+			}
+		}
 
 		w.Header().Set("Server", "mastoguard")
+
+		accessLog(r, guid, sip, "ALLOW")
+		defer accessLog(r, guid, sip, "HANDLED")
 		p.ServeHTTP(w, r)
 	}
 }
 
-func accessLog(r *http.Request, prefix string) {
-	a := r.RemoteAddr
+func remoteIP(r *http.Request) []string {
+	t := make([]string, 0)
+	a, _, _ := net.SplitHostPort(r.RemoteAddr)
 	f := r.Header.Get("X-Forwarded-For")
 	if f != "" {
-		a = f
+		t = strings.Split(f, ",")
+	} else {
+		t = append(t, a)
 	}
-	ltsvlog.Logger.Info().String("result", prefix).String("method", r.Method).String("url", r.URL.String()).String("remote", a).String("useragent", r.UserAgent()).Log()
+	return t
+}
+
+func accessLog(r *http.Request, guid string, remoteAddr string, status string) {
+	ltsvlog.Logger.Info().String("xid", guid).String("method", r.Method).String("url", r.URL.String()).String("remote", remoteAddr).String("useragent", r.UserAgent()).String("status", status).Log()
+}
+
+func Contains(cidr *net.IPNet, target string) bool {
+	ip := net.ParseIP(target)
+	return cidr.Contains(ip)
 }

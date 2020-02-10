@@ -3,3 +3,5 @@ github.com/hnakamur/errstack v0.2.0/go.mod h1:od3sg2FcV0HOZ1VGgL/cfn5yvj5hdHZsTF
 github.com/hnakamur/ltsvlog v2.0.4+incompatible h1:edFPELOLdpLAvVfMtjHfeSujkvE9CfnntA46GeADjY8=
 github.com/hnakamur/ltsvlog/v3 v3.0.3 h1:QYaVLPoOciv/tvtgEem32lgDzZDP8kX+BcXqzZV5MWM=
 github.com/hnakamur/ltsvlog/v3 v3.0.3/go.mod h1:ok1oGR09iFjjwaSvlxAYPDAVmc14H3AkCd5Fpj3BDW4=
+github.com/rs/xid v1.2.1 h1:mhH9Nq+C1fY2l1XIpgxIiUOfNpRBYH1kKcr+qfKgjRc=
+github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
