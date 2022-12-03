@@ -102,9 +102,7 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 			r.Header.Set("Host", u.Host)
 		}
 
-		ltsvlog.Logger.Debug().String("xid", guid).String("CF-Connecting-IP", r.Header.Get("CF-Connecting-IP")).String("X-Forwarded-For", r.Header.Get("X-Forwarded-For")).Log()
-
-		if cfRemote := r.Header.Get("CF-Connecting-IP"); cfRemote != "" {
+		if cfRemote := r.Header.Get("Cf-Connecting-Ip"); cfRemote != "" {
 			r.Header.Set("X-Forwarded-For", cfRemote)
 			rip = append([]string{cfRemote}, rip...)
 		} else {
