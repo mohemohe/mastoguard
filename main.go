@@ -1,9 +1,6 @@
 package main
 
 import (
-	"github.com/hnakamur/errstack"
-	"github.com/hnakamur/ltsvlog/v3"
-	"github.com/rs/xid"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -11,6 +8,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/hnakamur/errstack"
+	"github.com/hnakamur/ltsvlog/v3"
+	"github.com/rs/xid"
 )
 
 var instances = make([]string, 0)
@@ -33,7 +34,7 @@ func main() {
 
 	a := os.Getenv("LISTEN_ADDR")
 	if a == "" {
-		a  = ":8080"
+		a = ":8080"
 	}
 	ltsvlog.Logger.Debug().String("env 'LISTEN_ADDR'", a).Log()
 
@@ -89,7 +90,6 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 		guid := xid.New().String()
 
 		rip := remoteIP(r)
-		sip := strings.Join(rip, ",")
 
 		r.URL.Scheme = u.Scheme
 		if h != "" {
@@ -101,14 +101,21 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 			r.Host = u.Host
 			r.Header.Set("Host", u.Host)
 		}
-		f := r.Header.Get("X-Forwarded-For")
-		if f == "" {
-			f = r.RemoteAddr
-		} else {
-			f += "," + r.RemoteAddr
-		}
-		r.Header.Set("X-Forwarded-For", f)
 
+		if cfRemote := r.Header.Get("Cf-Connecting-Ip"); cfRemote != "" {
+			r.Header.Set("X-Forwarded-For", cfRemote)
+			rip = append([]string{cfRemote}, rip...)
+		} else {
+			f := r.Header.Get("X-Forwarded-For")
+			if f == "" {
+				f = r.RemoteAddr
+			} else {
+				f += "," + r.RemoteAddr
+			}
+			r.Header.Set("X-Forwarded-For", f)
+		}
+
+		sip := strings.Join(rip, ",")
 		accessLog(r, guid, sip, "REQUEST")
 
 		ua := r.UserAgent()
