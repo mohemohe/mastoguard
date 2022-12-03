@@ -51,7 +51,7 @@ func main() {
 
 	bs := os.Getenv("DENY_UA")
 	if bs != "" {
-		instances = strings.Split(bs, ",")
+		instances = strings.Split(strings.ToLower(bs), ",")
 	} else {
 		instances = make([]string, 0)
 	}
@@ -118,7 +118,7 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 		sip := strings.Join(rip, ",")
 		accessLog(r, guid, sip, "REQUEST")
 
-		ua := r.UserAgent()
+		ua := strings.ToLower(r.UserAgent())
 		for _, v := range instances {
 			if strings.Contains(ua, v) {
 				accessLog(r, guid, sip, "DENY")
