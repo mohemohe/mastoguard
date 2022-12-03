@@ -1,4 +1,4 @@
-FROM golang:1.13.6-alpine3.11 as builder
+FROM golang:1.19.3-alpine3.17 as builder
 
 ARG GOLANG_NAMESPACE="github.com/mohemohe/mastoguard"
 ENV GOLANG_NAMESPACE="$GOLANG_NAMESPACE"
