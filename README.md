@@ -1,8 +1,8 @@
 # mastoguard
 
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/mohemohe/mastoguard?style=flat-square)](https://hub.docker.com/r/mohemohe/mastoguard)
+[![build docker image](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml)
 
-ウザいインスタンスをブロックするためのリバプロ
+条件に一致するインスタンスをブロックするためのリバプロ
 
 ## 環境変数
 
