@@ -1,6 +1,6 @@
 # mastoguard
 
-[![build docker image](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml)
+[![build docker image](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/mohemohe/mastoguard/actions/workflows/build.yml) ![Docker Pulls](https://img.shields.io/docker/pulls/mohemohe/mastoguard.svg)
 
 条件に一致するインスタンスをブロックするためのリバプロ
 
