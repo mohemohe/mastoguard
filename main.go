@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -16,6 +18,7 @@ import (
 
 var instances = make([]string, 0)
 var cidrs = make([]*net.IPNet, 0)
+var bodies = make([]string, 0)
 var denyCode = 451
 var nullBody = []byte("")
 
@@ -72,6 +75,14 @@ func main() {
 		cidrs = make([]*net.IPNet, 0)
 	}
 	ltsvlog.Logger.Debug().String("env 'DENY_CIDR'", cs).Log()
+
+	ds := os.Getenv("DENY_BODY")
+	if ds != "" {
+		bodies = strings.Split(strings.ToLower(ds), ",")
+	} else {
+		bodies = make([]string, 0)
+	}
+	ltsvlog.Logger.Debug().String("env 'DENY_BODY'", ds).Log()
 
 	u, err := url.Parse(t)
 	if err != nil {
@@ -138,6 +149,24 @@ func handler(p *httputil.ReverseProxy, u *url.URL, h string) func(http.ResponseW
 					w.WriteHeader(denyCode)
 					_, _ = w.Write(nullBody)
 					return
+				}
+			}
+		}
+
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+			body, err := io.ReadAll(r.Body)
+			if err == nil {
+				r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+				for _, v := range bodies {
+					if strings.Contains(string(body), v) { // 今時UTF-8以外で送ってくる実装はないよな
+						accessLog(r, guid, sip, "DENY")
+						defer accessLog(r, guid, sip, "HANDLED")
+
+						w.WriteHeader(denyCode)
+						_, _ = w.Write(nullBody)
+						return
+					}
 				}
 			}
 		}
